@@ -1,0 +1,46 @@
+name: Update language selector and LinkedIn
+
+on:
+  push:
+    paths:
+      - '.github/workflows/update-language-linkedin.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update language selector and contact
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          s=s.replace(".toggle{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer}", ".langSwitch{position:fixed;right:24px;top:84px;z-index:20;display:flex;align-items:center;gap:4px;padding:5px;background:rgba(13,27,42,.95);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.22);backdrop-filter:blur(12px)}.langSwitch button{border:0;background:transparent;color:var(--muted);border-radius:10px;padding:10px 14px;font-weight:800;font-size:13px;cursor:pointer;transition:.2s}.langSwitch button.active{background:var(--mint);color:#07111f}.langSwitch button:hover:not(.active){color:var(--text);background:rgba(255,255,255,.05)}")
+
+          s=s.replace("@media(max-width:600px){.wrap{width:calc(100% - 24px)}", "@media(max-width:600px){.langSwitch{right:12px;top:78px}.langSwitch button{padding:9px 11px;font-size:12px}.wrap{width:calc(100% - 24px)}")
+
+          s=s.replace('<button class="toggle" id="lang">ES</button></nav></header>', '</nav></header><div class="langSwitch" aria-label="Language selector"><button id="langEn" class="active" type="button">English</button><button id="langEs" type="button">Español</button></div>')
+
+          old_contact='<div id="phoneLine"><span data-en="U.S. phone:" data-es="Teléfono México:">U.S. phone:</span> <a id="phoneLink" href="tel:+12136562006">+1 213-656-2006</a></div></div></div><a class="btn primary" href="mailto:arturomichel90@gmail.com" data-en="Email Arturo" data-es="Enviar correo a Arturo">Email Arturo</a>'
+          new_contact='<div id="phoneLine"><span data-en="U.S. phone:" data-es="Teléfono México:">U.S. phone:</span> <a id="phoneLink" href="tel:+12136562006">+1 213-656-2006</a></div><div><span>LinkedIn:</span> <a href="https://www.linkedin.com/in/arturo-michel-120728142/" target="_blank" rel="noopener noreferrer">linkedin.com/in/arturo-michel-120728142</a></div></div></div><a class="btn primary" href="mailto:arturomichel90@gmail.com" data-en="Email Arturo" data-es="Enviar correo a Arturo">Email Arturo</a>'
+          if old_contact not in s: raise SystemExit('contact block not found')
+          s=s.replace(old_contact,new_contact,1)
+
+          old_js="let lang='en';const btn=document.getElementById('lang');function applyLanguage(next){lang=next;document.documentElement.lang=lang;document.querySelectorAll('[data-en][data-es]').forEach(el=>{el.textContent=el.dataset[lang]});const labels=lang==='es'?monthsEs:monthsEn;transportChart.data.labels=labels;packagingChart.data.labels=labels;transportChart.update();packagingChart.update();const phoneLabel=document.querySelector('#phoneLine span');const phone=document.getElementById('phoneLink');if(lang==='es'){phoneLabel.textContent='Teléfono México:';phone.textContent='+52 33-1307-2054';phone.href='tel:+523313072054';btn.textContent='EN';}else{phoneLabel.textContent='U.S. phone:';phone.textContent='+1 213-656-2006';phone.href='tel:+12136562006';btn.textContent='ES';}}btn.addEventListener('click',()=>applyLanguage(lang==='en'?'es':'en'));"
+          new_js="let lang='en';const langEn=document.getElementById('langEn'),langEs=document.getElementById('langEs');function applyLanguage(next){lang=next;document.documentElement.lang=lang;document.querySelectorAll('[data-en][data-es]').forEach(el=>{el.textContent=el.dataset[lang]});const labels=lang==='es'?monthsEs:monthsEn;transportChart.data.labels=labels;packagingChart.data.labels=labels;transportChart.update();packagingChart.update();const phoneLabel=document.querySelector('#phoneLine span');const phone=document.getElementById('phoneLink');langEn.classList.toggle('active',lang==='en');langEs.classList.toggle('active',lang==='es');if(lang==='es'){phoneLabel.textContent='Teléfono México:';phone.textContent='+52 33-1307-2054';phone.href='tel:+523313072054';}else{phoneLabel.textContent='U.S. phone:';phone.textContent='+1 213-656-2006';phone.href='tel:+12136562006';}}langEn.addEventListener('click',()=>applyLanguage('en'));langEs.addEventListener('click',()=>applyLanguage('es'));"
+          if old_js not in s: raise SystemExit('language JS block not found')
+          s=s.replace(old_js,new_js,1)
+
+          p.write_text(s,encoding='utf-8')
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Improve language selector and add LinkedIn" || exit 0
+          git push
