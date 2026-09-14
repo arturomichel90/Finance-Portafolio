@@ -1,0 +1,36 @@
+name: Add dashboard interactions
+
+on:
+  push:
+    paths:
+      - '.github/workflows/add-dashboard-interactions.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enhance dashboard interactions and color hierarchy
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          css='''.kpi,.card,.panel,.case,.skill,.snapshot,.driver{transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease,background .25s ease}.kpi:hover,.case:hover,.skill:hover,.driver:hover{transform:translateY(-4px);border-color:rgba(94,230,181,.45);box-shadow:0 14px 32px rgba(0,0,0,.22)}.card:hover,.panel:hover,.snapshot:hover{border-color:rgba(134,184,255,.38);box-shadow:0 18px 38px rgba(0,0,0,.24)}.btn{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.btn:hover{transform:translateY(-2px)}.primary:hover{box-shadow:0 10px 24px rgba(94,230,181,.22)}.secondary:hover{border-color:rgba(134,184,255,.5);box-shadow:0 10px 24px rgba(134,184,255,.10)}.kpi:nth-child(3) strong{color:var(--blue)}.kpi:nth-child(4) strong{color:var(--mint)}.caseMetric{color:var(--mint)}.capexAccent .kicker,.capexAccent .caseMetric,.capexAccent .year{color:var(--gold)!important}.capexAccent{border-color:rgba(242,201,109,.25)!important}.reveal{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}.reveal.visible{opacity:1;transform:none}.chartHead .stat{transition:color .25s ease}.card:hover .chartHead .stat{color:var(--mint)}.links a{position:relative;transition:color .2s ease}.links a:hover{color:var(--text)}.links a:after{content:'';position:absolute;left:0;bottom:-8px;width:0;height:2px;background:var(--mint);transition:width .2s ease}.links a:hover:after{width:100%}@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.kpi,.card,.panel,.case,.skill,.snapshot,.driver,.btn{transition:none!important}}'''
+          s=s.replace('</style>',css+'</style>',1)
+
+          js=''';(()=>{const targets=document.querySelectorAll('.kpi,.card,.panel,.case,.skill,.timelineItem,.contact');targets.forEach(el=>el.classList.add('reveal'));const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target)}}),{threshold:.12});targets.forEach(el=>io.observe(el));document.querySelectorAll('.case,.panel').forEach(el=>{const t=(el.textContent||'').toLowerCase();if(t.includes('capex')||t.includes('capital expenditure'))el.classList.add('capexAccent')});})();'''
+          s=s.replace('</script>',js+'</script>',1)
+          p.write_text(s,encoding='utf-8')
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Add interactive dashboard polish and color hierarchy" || exit 0
+          git push
