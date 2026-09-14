@@ -1,0 +1,75 @@
+name: Update language position and currency
+
+on:
+  push:
+    paths:
+      - '.github/workflows/update-language-currency.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply language position and currency logic
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          # Move language selector from right to left, same vertical position.
+          s=s.replace('.langSwitch{position:fixed;right:24px;top:84px;', '.langSwitch{position:fixed;left:24px;top:84px;', 1)
+          s=s.replace('@media(max-width:600px){.langSwitch{right:12px;top:78px}', '@media(max-width:600px){.langSwitch{left:12px;top:78px}', 1)
+
+          # Give key financial amounts language-specific values.
+          s=s.replace('<div class="stat">MXN $100M–$125M<small', '<div class="stat"><span id="transportStat" data-en="USD $5.5M–$6.8M" data-es="MXN $100M–$125M">USD $5.5M–$6.8M</span><small', 1)
+          s=s.replace('<strong>≈$5.5M–$6.8M</strong>', '<strong id="transportEquivalent" data-en="≈MXN $100M–$125M" data-es="≈USD $5.5M–$6.8M">≈MXN $100M–$125M</strong>', 1)
+          s=s.replace('<strong>≈MXN $9.4M</strong>', '<strong id="transportAvg" data-en="≈USD $512K" data-es="≈MXN $9.4M">≈USD $512K</strong>', 1)
+
+          s=s.replace('<div class="stat">MXN $4.5M–$5.5M<small', '<div class="stat"><span id="packagingStat" data-en="USD $224K–$274K" data-es="MXN $4.5M–$5.5M">USD $224K–$274K</span><small', 1)
+          s=s.replace('<strong>≈$224K–$274K</strong>', '<strong id="packagingEquivalent" data-en="≈MXN $4.5M–$5.5M" data-es="≈USD $224K–$274K">≈MXN $4.5M–$5.5M</strong>', 1)
+          s=s.replace('<strong>≈MXN $417K</strong>', '<strong id="packagingAvg" data-en="≈USD $20.7K" data-es="≈MXN $417K">≈USD $20.7K</strong>', 1)
+
+          # Case study headline metrics.
+          s=s.replace('MXN $100M–$125M annual savings', '<span data-en="USD $5.5M–$6.8M annual savings" data-es="MXN $100M–$125M de ahorro anual">USD $5.5M–$6.8M annual savings</span>', 1)
+          s=s.replace('MXN $4.5M–$5.5M annual savings', '<span data-en="USD $224K–$274K annual savings" data-es="MXN $4.5M–$5.5M de ahorro anual">USD $224K–$274K annual savings</span>', 1)
+
+          # Replace the monthly arrays/chart setup with currency-aware datasets and formatters.
+          s=s.replace("const transportMonthly=[8.9,9.2,9.5,9.1,9.7,9.4,9.8,9.3,9.6,9.0,9.7,9.3];", "const transportMonthlyMXN=[8.9,9.2,9.5,9.1,9.7,9.4,9.8,9.3,9.6,9.0,9.7,9.3];const transportMonthlyUSD=transportMonthlyMXN.map(v=>+(v/18.325).toFixed(3));")
+          s=s.replace("const packagingMonthly=[390,405,420,410,435,425,440,415,430,400,445,385];", "const packagingMonthlyMXN=[390,405,420,410,435,425,440,415,430,400,445,385];const packagingMonthlyUSD=packagingMonthlyMXN.map(v=>+(v/20.109).toFixed(1));")
+
+          s=s.replace("data:transportMonthly", "data:transportMonthlyUSD", 1)
+          s=s.replace("data:packagingMonthly", "data:packagingMonthlyUSD", 1)
+
+          # Axis labels and tooltips: use current language/currency.
+          s=s.replace("'MXN millions'", "lang==='es'?'MXN millones':'USD millions'")
+          s=s.replace("'MXN thousands'", "lang==='es'?'MXN miles':'USD thousands'")
+
+          # Inject a helper used whenever language changes.
+          marker="function applyLanguage(next){lang=next;"
+          helper="function applyCurrency(){const es=lang==='es';transportChart.data.datasets[0].data=es?transportMonthlyMXN:transportMonthlyUSD;packagingChart.data.datasets[0].data=es?packagingMonthlyMXN:packagingMonthlyUSD;transportChart.options.scales.y.title.text=es?'MXN millones':'USD millions';packagingChart.options.scales.y.title.text=es?'MXN miles':'USD thousands';transportChart.update();packagingChart.update();}function applyLanguage(next){lang=next;"
+          if marker not in s:
+              raise SystemExit('applyLanguage marker not found')
+          s=s.replace(marker, helper, 1)
+
+          # Avoid updating charts before currency values are switched, then run the helper.
+          s=s.replace("transportChart.data.labels=labels;packagingChart.data.labels=labels;transportChart.update();packagingChart.update();", "transportChart.data.labels=labels;packagingChart.data.labels=labels;applyCurrency();", 1)
+
+          # Currency-aware tooltip callbacks, replacing any existing hardcoded versions.
+          s=re.sub(r"label:\(ctx\)=>`MXN \\$\$\{ctx\.parsed\.y\.toFixed\(1\)\}M[^`]*`", "label:(ctx)=>lang==='es'?`MXN $${ctx.parsed.y.toFixed(1)}M`:`USD $${ctx.parsed.y.toFixed(2)}M`", s)
+          s=re.sub(r"label:\(ctx\)=>`MXN \\$\$\{ctx\.parsed\.y\.toFixed\(0\)\}K[^`]*`", "label:(ctx)=>lang==='es'?`MXN $${ctx.parsed.y.toFixed(0)}K`:`USD $${ctx.parsed.y.toFixed(1)}K`", s)
+
+          p.write_text(s,encoding='utf-8')
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Use USD in English and move language selector left" || exit 0
+          git push
