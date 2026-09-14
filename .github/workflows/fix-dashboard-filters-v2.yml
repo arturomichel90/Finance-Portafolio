@@ -1,0 +1,49 @@
+name: Fix dashboard filters v2
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-dashboard-filters-v2.yml'
+permissions:
+  contents: write
+jobs:
+  fix-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Correct filters and chart currency behavior
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          # Replace control bar: remove Monthly/Annual; expand real project list.
+          new_controls='''<div class="dashboardControls" id="dashboardControls"><div class="controlGroup"><label data-en="Currency" data-es="Moneda">Currency</label><select id="currencyFilter"><option value="usd">USD</option><option value="mxn">MXN</option></select></div><div class="controlGroup"><label data-en="Project" data-es="Proyecto">Project</label><select id="projectFilter"><option value="all" data-en="All projects" data-es="Todos los proyectos">All projects</option><option value="transport" data-en="Transportation savings vs. budget" data-es="Ahorro transporte vs. presupuesto">Transportation savings vs. budget</option><option value="packaging" data-en="Packaging savings" data-es="Ahorro en empaques">Packaging savings</option><option value="close" data-en="Month-end close reduction" data-es="Reducción del cierre mensual">Month-end close reduction</option><option value="capex" data-en="CAPEX utilization" data-es="Utilización de CAPEX">CAPEX utilization</option><option value="forecast" data-en="Forecast accuracy improvement" data-es="Mejora de precisión del forecast">Forecast accuracy improvement</option></select></div><button class="resetFilters" id="resetFilters" type="button" data-en="↻ Reset" data-es="↻ Restablecer">↻ Reset</button><div class="filterStatus" data-en="Filter by project and reporting currency" data-es="Filtra por proyecto y moneda de reporte">Filter by project and reporting currency</div></div>'''
+          s=re.sub(r'<div class="dashboardControls" id="dashboardControls">.*?</div></div><div class="kpis">',new_controls+'<div class="kpis">',s,count=1,flags=re.S)
+
+          # Tag existing dashboard project cards explicitly.
+          s=s.replace('<article class="card"><div class="chartHead"><div><div class="kicker" data-en="COST OPTIMIZATION"','<article class="card" data-project="transport"><div class="chartHead"><div><div class="kicker" data-en="COST OPTIMIZATION"',1)
+          s=s.replace('<article class="card"><div class="kicker" data-en="PLANNING"','<article class="card" data-project="forecast"><div class="kicker" data-en="PLANNING"',1)
+          s=s.replace('<article class="card"><div class="chartHead"><div><div class="kicker" data-en="LATAM STANDARDIZATION"','<article class="card" data-project="packaging"><div class="chartHead"><div><div class="kicker" data-en="LATAM STANDARDIZATION"',1)
+          s=s.replace('<article class="card"><div class="chartHead"><div><div class="kicker" data-en="MANUFACTURING FINANCE"','<article class="card" data-project="capex"><div class="chartHead"><div><div class="kicker" data-en="MANUFACTURING FINANCE"',1)
+
+          # Add quantified close-reduction project to dashboard if missing.
+          if 'data-project="close"' not in s:
+              close_card='''<article class="card" data-project="close"><div class="kicker" data-en="CONTROLLERSHIP" data-es="CONTRALORÍA">CONTROLLERSHIP</div><h4 data-en="Month-end close reduction" data-es="Reducción del cierre mensual">Month-end close reduction</h4><div class="projectTag"><b>Fresenius</b><span>2019–2021</span></div><div class="metric"><strong>5 → 2</strong><div class="bar"><i style="width:60%"></i></div></div><p class="note" data-en="Reduced month-end deliverables from five days to two days for U.S. corporate reporting." data-es="Reduje los entregables de cierre mensual de cinco días a dos días para el reporte corporativo a EE. UU.">Reduced month-end deliverables from five days to two days for U.S. corporate reporting.</p></article>'''
+              s=s.replace('</article></div><div class="panels">','</article>'+close_card+'</div><div class="panels">',1)
+
+          # Remove obsolete annual-mode CSS behavior.
+          s=s.replace('.annualMode .canvas{opacity:.32;filter:saturate(.7)}.annualMode .driverGrid{opacity:.72}','')
+
+          # Append a clean override controller. It intentionally supersedes the first filter script.
+          js='''<script>(()=>{function installFinanceFilters(){const currency=document.getElementById('currencyFilter'),project=document.getElementById('projectFilter'),reset=document.getElementById('resetFilters');if(!currency||!project||!reset||typeof transportChart==='undefined'||typeof packagingChart==='undefined')return;function setCurrency(cur){const mxn=cur==='mxn';transportChart.data.datasets[0].data=mxn?transportMonthlyMXN:transportMonthlyUSD;packagingChart.data.datasets[0].data=mxn?packagingMonthlyMXN:packagingMonthlyUSD;delete transportChart.options.scales.y.min;delete transportChart.options.scales.y.max;delete packagingChart.options.scales.y.min;delete packagingChart.options.scales.y.max;if(mxn){transportChart.options.scales.y.suggestedMin=8.5;transportChart.options.scales.y.suggestedMax=10.2;transportChart.options.scales.y.ticks.callback=v=>'MXN $'+Number(v).toFixed(1)+'M';packagingChart.options.scales.y.suggestedMin=360;packagingChart.options.scales.y.suggestedMax=460;packagingChart.options.scales.y.ticks.callback=v=>'MXN $'+v+'K';document.getElementById('transportStat').textContent='MXN $100M–$125M';document.getElementById('transportAvg').textContent='≈MXN $9.4M';document.getElementById('transportEquivalent').textContent='≈USD $5.5M–$6.8M';document.getElementById('packagingStat').textContent='MXN $4.5M–$5.5M';document.getElementById('packagingAvg').textContent='≈MXN $417K';document.getElementById('packagingEquivalent').textContent='≈USD $224K–$274K'}else{transportChart.options.scales.y.suggestedMin=.45;transportChart.options.scales.y.suggestedMax=.56;transportChart.options.scales.y.ticks.callback=v=>'USD $'+Number(v).toFixed(2)+'M';packagingChart.options.scales.y.suggestedMin=18;packagingChart.options.scales.y.suggestedMax=23;packagingChart.options.scales.y.ticks.callback=v=>'USD $'+Number(v).toFixed(1)+'K';document.getElementById('transportStat').textContent='USD $5.5M–$6.8M';document.getElementById('transportAvg').textContent='≈USD $512K';document.getElementById('transportEquivalent').textContent='≈MXN $100M–$125M';document.getElementById('packagingStat').textContent='USD $224K–$274K';document.getElementById('packagingAvg').textContent='≈USD $20.7K';document.getElementById('packagingEquivalent').textContent='≈MXN $4.5M–$5.5M'}transportChart.options.plugins.tooltip.callbacks.label=c=>{if(mxn)return ((typeof lang!=='undefined'&&lang==='es')?'Ahorro mensual: MXN $':'Monthly savings: MXN $')+Number(c.raw).toFixed(1)+'M';return ((typeof lang!=='undefined'&&lang==='es')?'Ahorro mensual: USD $':'Monthly savings: USD $')+Number(c.raw).toFixed(3)+'M'};packagingChart.options.plugins.tooltip.callbacks.label=c=>{if(mxn)return ((typeof lang!=='undefined'&&lang==='es')?'Ahorro mensual: MXN $':'Monthly savings: MXN $')+Number(c.raw).toFixed(0)+'K';return ((typeof lang!=='undefined'&&lang==='es')?'Ahorro mensual: USD $':'Monthly savings: USD $')+Number(c.raw).toFixed(1)+'K'};transportChart.update();packagingChart.update()}function setProject(v){document.querySelectorAll('#dashboard [data-project]').forEach(el=>el.classList.toggle('filterHidden',v!=='all'&&el.dataset.project!==v));document.querySelectorAll('#dashboard .panels').forEach(el=>el.classList.toggle('filterHidden',v!=='all'))}currency.addEventListener('change',()=>setCurrency(currency.value));project.addEventListener('change',()=>setProject(project.value));reset.addEventListener('click',()=>{currency.value=(typeof lang!=='undefined'&&lang==='es')?'mxn':'usd';project.value='all';setCurrency(currency.value);setProject('all')});document.getElementById('langEn')?.addEventListener('click',()=>setTimeout(()=>setCurrency(currency.value),0));document.getElementById('langEs')?.addEventListener('click',()=>setTimeout(()=>setCurrency(currency.value),0));currency.value=(typeof lang!=='undefined'&&lang==='es')?'mxn':'usd';setCurrency(currency.value);setProject('all')}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installFinanceFilters);else installFinanceFilters()})();</script>'''
+          s=s.replace('</body>',js+'</body>',1)
+          p.write_text(s,encoding='utf-8')
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Fix currency charts and expand project filters" || exit 0
+          git push
