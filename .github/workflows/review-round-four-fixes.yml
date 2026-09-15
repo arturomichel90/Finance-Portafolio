@@ -1,0 +1,116 @@
+name: Apply four reviewed dashboard fixes
+on:
+  push:
+    paths:
+      - '.github/workflows/review-round-four-fixes.yml'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply only four reviewed fixes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          marker='/* REVIEW_ROUND_FOUR_FIXES */'
+          if marker in s: raise SystemExit('Already applied')
+          css=r'''
+          /* REVIEW_ROUND_FOUR_FIXES */
+          #skills>.wrap>.subhead:not(#toolkitV2Head){display:none!important}
+          .automationV3{margin-top:18px}
+          .workWeek{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:16px 0 12px}
+          .workDay{height:38px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.035)}
+          .workDay.unlocked{background:linear-gradient(135deg,rgba(94,230,181,.72),rgba(134,184,255,.55));border-color:rgba(94,230,181,.75);box-shadow:0 0 18px rgba(94,230,181,.16)}
+          .automationImpact{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+          .automationImpact div{padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.025);font-size:11px;color:var(--muted)}
+          .automationImpact b{display:block;color:var(--text);font-size:12px;margin-bottom:3px}
+          @media(max-width:600px){.automationImpact{grid-template-columns:1fr}}
+          '''
+          s=s.replace('</style>',css+'\n</style>',1)
+          js=r'''
+          <script>
+          // REVIEW_ROUND_FOUR_FIXES_SCRIPT
+          (()=>{
+            const $=q=>document.querySelector(q), $$=q=>[...document.querySelectorAll(q)];
+            const lang=()=>document.documentElement.lang==='es'?'es':'en';
+
+            function packagingBars(){
+              if(typeof packaging==='undefined')return;
+              packaging.config.type='bar';
+              packaging.options.scales={x:{grid:{display:false},ticks:{color:muted}},y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:muted}}};
+              const v=($('#currencyFilter')?.value||'usd').toLowerCase();
+              const data=v==='mxn'?[3.2,4.6,3.5,4.8,3.9,4.4,3.3,4.7,4.1,3.6,4.9,4.2]:[188,271,206,282,229,259,194,276,241,212,288,247];
+              packaging.data.datasets=[{label:lang()==='es'?'Ahorro mensual recurrente':'Recurring monthly savings',data,backgroundColor:'rgba(94,230,181,.55)',borderColor:mint,borderWidth:1,borderRadius:5}];
+              packaging.options.plugins.tooltip.callbacks.label=v==='mxn'?(ctx)=>'MXN $'+ctx.raw.toFixed(1)+'M':(ctx)=>'USD $'+ctx.raw+'K';
+              packaging.update();
+            }
+
+            function automationVisual(){
+              const card=$$('.case').find(c=>c.querySelector('h4')?.dataset.en==='SQL Logistics Cost Automation'); if(!card)return;
+              const old=card.querySelector('.metric'); if(old)old.style.display='none';
+              let v=card.querySelector('.automationV3'); if(!v){v=document.createElement('div');v.className='automationV3';card.appendChild(v)}
+              const es=lang()==='es';
+              v.innerHTML=`<div class="caseMetric">${es?'1 día/semana liberado':'1 day/week unlocked'}</div><div class="workWeek"><span class="workDay unlocked"></span><span class="workDay"></span><span class="workDay"></span><span class="workDay"></span><span class="workDay"></span></div><div class="automationImpact"><div><b>${es?'Operaciones':'Operations'}</b>${es?'Más tiempo para actividades operativas de mayor valor.':'More time for higher-value operational activities.'}</div><div><b>${es?'Finanzas':'Finance'}</b>${es?'Más tiempo para análisis y soporte a decisiones.':'More time for analysis and decision support.'}</div></div>`;
+              const p=card.querySelector('p'); if(p){p.dataset.en='Automated logistics costing and billing workflows with SQL (BigQuery) across 20M–25M monthly shipments, freeing capacity for Operations and Finance.';p.dataset.es='Automaticé procesos de costeo y facturación logística con SQL (BigQuery) sobre 20M–25M de envíos mensuales, liberando capacidad para Operaciones y Finanzas.';p.textContent=p.dataset[lang()]}
+            }
+
+            function enrichExperience(){
+              const details=$$('.experienceDetails .timelineItem');
+              details.forEach(item=>{
+                const role=item.querySelector('.role')?.textContent||''; const ul=item.querySelector('.expBullets'); if(!ul)return;
+                let extra=[];
+                if(role.includes('Logistics FP&A Lead')) extra=[
+                  ['Built Peak Season scenarios at +5%, +10%, -5% and -10% vs. forecast, assessing cost, capacity and resource requirements.','Construí escenarios de Peak Season de +5%, +10%, -5% y -10% vs. forecast, evaluando costo, capacidad y requerimientos de recursos.'],
+                  ['Identified carrier billing discrepancies and supported recovery of credits against subsequent monthly costs; reduced accrual-to-billing variance to <1%.','Identifiqué discrepancias de facturación de transportistas y apoyé la recuperación de créditos contra costos mensuales posteriores; reduje la variación accrual-to-billing a <1%.'],
+                  ['Evaluated route and carrier scenarios using total spend and cost per shipment, supporting implemented route changes.','Evalué escenarios de rutas y transportistas usando gasto total y costo por envío, apoyando cambios de ruta implementados.'],
+                  ['Led 4 direct-report analysts; 2 advanced to new roles and the remaining team became autonomous. Interviewed 3 candidates and supported selection, onboarding and training of 2 hires.','Lideré 4 analistas directos; 2 avanzaron a nuevos roles y el resto del equipo se volvió autónomo. Entrevisté a 3 candidatos y apoyé la selección, onboarding y capacitación de 2 contrataciones.'],
+                  ['Built ROI, NPV and CAPEX business cases and presented results in Finance Manager and senior-leadership Financial Reviews.','Construí business cases de ROI, VAN y CAPEX y presenté resultados en Financial Reviews con Finance Manager y liderazgo senior.']
+                ];
+                else if(role.includes('Fulfillment Controller')) extra=[
+                  ['Planned headcount and labor costs based on volume and operational requirements.','Planeé headcount y costos laborales con base en volumen y requerimientos operativos.'],
+                  ['Served as Finance Business Partner for Operations, Engineering, Quality, Maintenance and HR.','Actué como Finance Business Partner para Operaciones, Ingeniería, Calidad, Mantenimiento y Recursos Humanos.'],
+                  ['Standardized OPEX, budget and forecast controls across Mexico Fulfillment Centers.','Estandaricé controles de OPEX, presupuesto y forecast en los Fulfillment Centers de México.'],
+                  ['Scaled packaging analytics to Mexico, Brazil and Argentina and supported CAPEX, business cases, warehouse investments and productivity initiatives.','Escalé la analítica de empaque a México, Brasil y Argentina y apoyé CAPEX, business cases, inversiones de almacén e iniciativas de productividad.'],
+                  ['Led weekly financial reviews with Directors.','Lideré revisiones financieras semanales con Directores.']
+                ];
+                else if(role.includes('Assistant Controller')) extra=[
+                  ['Managed product costing and BOMs, standard costs, production volumes, materials and inventory; analyzed PPV, material usage, FX and manufacturing variances.','Gestioné costeo de producto y BOMs, costos estándar, volúmenes de producción, materiales e inventario; analicé PPV, uso de materiales, FX y variaciones de manufactura.'],
+                  ['Managed close activities across production orders, allocations, inventory, utilities and manufacturing expenses.','Gestioné actividades de cierre de órdenes de producción, asignaciones, inventario, servicios y gastos de manufactura.'],
+                  ['Managed OPEX, fixed assets, accounts payable and P&L review and supported SOX controls, physical inventories and internal/external audits.','Gestioné OPEX, activos fijos, cuentas por pagar y revisión de P&L, y apoyé controles SOX, inventarios físicos y auditorías internas/externas.']
+                ];
+                else if(role.includes('CAPEX & Fixed Assets')) extra=[
+                  ['Owned CAPEX and depreciation budgeting, forecasting and variance analysis plus capitalization, transfers, disposals and fixed-asset controls.','Gestioné presupuesto, forecast y análisis de variaciones de CAPEX y depreciación, además de capitalizaciones, transferencias, bajas y controles de activos fijos.'],
+                  ['Automated CAPEX reporting with SAP and Advanced Excel and partnered with Engineering and Quality on investment execution.','Automaticé reportes de CAPEX con SAP y Excel Avanzado y colaboré con Ingeniería y Calidad en la ejecución de inversiones.'],
+                  ['Supported SOX compliance, fixed-asset inventories and internal/external audits.','Apoyé cumplimiento SOX, inventarios de activos fijos y auditorías internas/externas.']
+                ];
+                extra.forEach(([en,es])=>{if(![...ul.children].some(li=>li.dataset.en===en)){const li=document.createElement('li');li.dataset.en=en;li.dataset.es=es;li.textContent=lang()==='es'?es:en;ul.appendChild(li)}})
+              })
+            }
+
+            const oldSet=window.setCurrency; if(oldSet)window.setCurrency=function(v){oldSet(v);setTimeout(packagingBars,20)};
+            function refresh(){packagingBars();automationVisual();enrichExperience()}
+            window.addEventListener('load',()=>setTimeout(refresh,180));
+            $('#currencyFilter')?.addEventListener('change',()=>setTimeout(refresh,120));
+            $('#currencyFilter2')?.addEventListener('change',()=>setTimeout(refresh,120));
+            $('#experienceView')?.addEventListener('change',()=>setTimeout(refresh,120));
+            $('#experienceView2')?.addEventListener('change',()=>setTimeout(refresh,120));
+            $('#langEn')?.addEventListener('click',()=>setTimeout(refresh,150));
+            $('#langEs')?.addEventListener('click',()=>setTimeout(refresh,150));
+            setTimeout(refresh,220);
+          })();
+          </script>
+          '''
+          s=s.replace('</body>',js+'\n</body>',1)
+          p.write_text(s)
+          PY
+      - name: Commit reviewed fixes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Apply four reviewed bilingual dashboard fixes"
+          git push
