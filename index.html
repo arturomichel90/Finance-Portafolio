@@ -67,6 +67,11 @@
 /* FOUR_FIXES_CORRECTED_20260914 */
 #skills>.wrap>.subhead:not(#toolkitV2Head){display:none!important}
 .automationV4{margin-top:18px}.workWeekV4{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:16px 0 12px}.workDayV4{height:38px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.035)}.workDayV4.unlocked{background:linear-gradient(135deg,rgba(94,230,181,.72),rgba(134,184,255,.55));border-color:rgba(94,230,181,.75)}.impactV4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.impactV4 div{padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.025);font-size:11px;color:var(--muted)}.impactV4 b{display:block;color:var(--text);font-size:12px;margin-bottom:3px}@media(max-width:600px){.impactV4{grid-template-columns:1fr}}
+
+/* FINAL_REVIEW_FIXES_20260914 */
+#skills>.wrap>.subhead:not(#toolkitV2Head){display:none!important}
+.sqlCapacityVisual{margin-top:18px}.sqlCapacityDays{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0}.sqlCapacityDay{height:40px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.035)}.sqlCapacityDay.active{background:linear-gradient(135deg,rgba(94,230,181,.72),rgba(134,184,255,.55));border-color:rgba(94,230,181,.75)}.sqlCapacityImpact{display:grid;grid-template-columns:1fr 1fr;gap:10px}.sqlCapacityImpact div{padding:10px 12px;border:1px solid var(--line);border-radius:11px;color:var(--muted);font-size:11px}.sqlCapacityImpact b{display:block;color:var(--text);font-size:12px;margin-bottom:3px}
+@media(max-width:600px){.sqlCapacityImpact{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -444,4 +449,70 @@ document.getElementById('experienceView').addEventListener('change',e=>{company=
   setTimeout(refresh,500);
 })();
 </script>
-</body></html>
+<script>
+/* FINAL_REVIEW_FIXES_SCRIPT */
+(()=>{
+  const $$=q=>[...document.querySelectorAll(q)], $=q=>document.querySelector(q);
+  const es=()=>document.documentElement.lang==='es';
+  const texts={
+    en:{months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],packLabel:'Recurring monthly savings',sql:'1 day/week unlocked',ops:'More time for higher-value operational activities.',fin:'More time for analysis and decision support.'},
+    es:{months:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],packLabel:'Ahorro mensual recurrente',sql:'1 día/semana liberado',ops:'Más tiempo para actividades operativas de mayor valor.',fin:'Más tiempo para análisis y soporte a decisiones.'}
+  };
+  const content={
+    'Logistics FP&A Lead':[
+      ['Led FP&A for Middle Mile, Cross-Border Trade and commercial carriers, overseeing <b>USD $44.1M monthly spend</b> and <b>20M–25M monthly shipments</b>.','Lideré FP&A de Middle Mile, Cross-Border Trade y transportistas comerciales, gestionando <b>MXN $750M de gasto mensual</b> y <b>20M–25M de envíos mensuales</b>.'],
+      ['Owned budgeting, forecasting, P&L and variance analysis, improving forecast accuracy from <b>70% → 95%</b>.','Gestioné presupuesto, forecast, P&L y variaciones, mejorando la precisión del forecast de <b>70% → 95%</b>.'],
+      ['Built Peak Season scenarios at <b>+5%, +10%, -5% and -10%</b> vs. forecast to assess cost, capacity and resources.','Construí escenarios de Peak Season de <b>+5%, +10%, -5% y -10%</b> vs. forecast para evaluar costo, capacidad y recursos.'],
+      ['Delivered recurring transportation savings of <b>USD $5.9M–$7.4M/month</b>, approximately <b>USD $0.29/shipment</b>.','Entregué ahorros recurrentes de transporte de <b>MXN $100M–$125M/mes</b>, aproximadamente <b>MXN $5/envío</b>.'],
+      ['Strengthened carrier billing and accrual controls, reducing accrual-to-billing variance to <b>&lt;1%</b>.','Fortalecí controles de facturación de carriers y accruals, reduciendo la variación accrual-to-billing a <b>&lt;1%</b>.'],
+      ['Led <b>4 financial analysts</b>; <b>2 advanced to new roles</b>, and supported interviews, onboarding and training for <b>2 hires</b>.','Lideré <b>4 analistas financieros</b>; <b>2 avanzaron a nuevos roles</b> y apoyé entrevistas, onboarding y capacitación de <b>2 contrataciones</b>.'],
+      ['Built <b>ROI, NPV and CAPEX</b> business cases and presented results in senior-leadership Financial Reviews.','Construí business cases de <b>ROI, VAN y CAPEX</b> y presenté resultados en Financial Reviews con liderazgo senior.']],
+    'Fulfillment Controller':[
+      ['Owned fulfillment OPEX, budget, forecast and headcount planning across Mexico Fulfillment Centers.','Gestioné OPEX, presupuesto, forecast y planeación de headcount en los Fulfillment Centers de México.'],
+      ['Served as Finance Business Partner for Operations, Engineering, Quality, Maintenance and HR.','Actué como Finance Business Partner para Operaciones, Ingeniería, Calidad, Mantenimiento y RH.'],
+      ['Scaled packaging analytics across Mexico, Brazil and Argentina, generating <b>USD $176K–$294K recurring monthly savings</b>.','Escalé la analítica de empaque en México, Brasil y Argentina, generando <b>MXN $3M–$5M de ahorro recurrente mensual</b>.'],
+      ['Managed a recurring packaging savings period of <b>12 months</b> against a monthly cost base of <b>~USD $29.4M</b>.','Gestioné un periodo de ahorro recurrente de empaque de <b>12 meses</b> sobre una base mensual de <b>~MXN $500M</b>.'],
+      ['Supported CAPEX, warehouse investments, business cases and productivity initiatives.','Apoyé CAPEX, inversiones de almacén, business cases e iniciativas de productividad.'],
+      ['Led weekly financial reviews with Directors and translated operational drivers into financial actions.','Lideré revisiones financieras semanales con Directores y traduje drivers operativos en acciones financieras.']],
+    'Assistant Controller':[
+      ['Managed product costing, BOMs, standard costs, production volumes, materials and inventory.','Gestioné costeo de producto, BOMs, costos estándar, volúmenes de producción, materiales e inventario.'],
+      ['Analyzed PPV, material usage, FX and manufacturing variances to explain P&L performance.','Analicé PPV, uso de materiales, FX y variaciones de manufactura para explicar el desempeño del P&L.'],
+      ['Reduced the complete monthly close package from <b>5 → 2 days</b> using SAP and Advanced Excel.','Reduje el paquete completo del cierre mensual de <b>5 → 2 días</b> usando SAP y Excel Avanzado.'],
+      ['Managed OPEX, fixed assets, accounts payable and P&L review.','Gestioné OPEX, activos fijos, cuentas por pagar y revisión de P&L.'],
+      ['Supported <b>SOX</b> controls, physical inventories and internal/external audits.','Apoyé controles <b>SOX</b>, inventarios físicos y auditorías internas/externas.'],
+      ['Partnered with manufacturing teams to improve cost visibility and month-end execution.','Colaboré con equipos de manufactura para mejorar visibilidad de costos y ejecución de cierre.']],
+    'CAPEX & Fixed Assets':[
+      ['Managed approximately <b>USD $100M annual CAPEX</b> across budgeting, forecasting and variance analysis.','Gestioné aproximadamente <b>MXN $1,700M de CAPEX anual</b> en presupuesto, forecast y análisis de variaciones.'],
+      ['Improved CAPEX execution from <b>~50% → ~90%</b>.','Mejoré la ejecución de CAPEX de <b>~50% → ~90%</b>.'],
+      ['Managed capitalization, transfers, disposals and fixed-asset controls.','Gestioné capitalizaciones, transferencias, bajas y controles de activos fijos.'],
+      ['Automated CAPEX reporting using <b>SAP and Advanced Excel</b>.','Automaticé reportes de CAPEX usando <b>SAP y Excel Avanzado</b>.'],
+      ['Built investment cases using <b>ROI, NPV and IRR</b> to support strategic decisions.','Construí casos de inversión usando <b>ROI, VAN y TIR</b> para apoyar decisiones estratégicas.'],
+      ['Supported SOX compliance, fixed-asset inventories and audits.','Apoyé cumplimiento SOX, inventarios de activos fijos y auditorías.']]
+  };
+  function packaging(){
+    let c;try{c=typeof window.packaging!=='undefined'?window.packaging:null}catch(e){}
+    if(!c)return;
+    const cur=(($('#currencyFilter')||$('#currencyFilter2'))?.value||'usd').toLowerCase(); const t=texts[es()?'es':'en'];
+    c.config.type='line'; c.data.labels=t.months;
+    c.data.datasets=[{label:t.packLabel,data:cur==='mxn'?[3.2,4.6,3.5,4.8,3.9,4.4,3.3,4.7,4.1,3.6,4.9,4.2]:[188,271,206,282,229,259,194,276,241,212,288,247],borderWidth:3,pointRadius:4,pointHoverRadius:6,tension:.25,fill:false}];
+    c.update();
+  }
+  function sql(){
+    const card=$$('.card').find(x=>(x.querySelector('h4')?.dataset.en||'').toLowerCase()==='sql logistics cost automation'); if(!card)return;
+    card.querySelectorAll('.metric,.automationV3,.automationV4').forEach(x=>x.remove());
+    let v=card.querySelector('.sqlCapacityVisual');if(!v){v=document.createElement('div');v.className='sqlCapacityVisual';card.insertBefore(v,card.querySelector('p.note'))}
+    const t=texts[es()?'es':'en']; v.innerHTML='<div class="caseMetric">'+t.sql+'</div><div class="sqlCapacityDays"><span class="sqlCapacityDay active"></span><span class="sqlCapacityDay"></span><span class="sqlCapacityDay"></span><span class="sqlCapacityDay"></span><span class="sqlCapacityDay"></span></div><div class="sqlCapacityImpact"><div><b>'+ (es()?'Operaciones':'Operations') +'</b>'+t.ops+'</div><div><b>'+ (es()?'Finanzas':'Finance') +'</b>'+t.fin+'</div></div>';
+    const p=card.querySelector('p.note');if(p){p.dataset.en='Automated logistics costing and billing analysis with SQL (BigQuery) across 20M–25M monthly shipments, freeing capacity for Operations and Finance.';p.dataset.es='Automaticé el costeo logístico y análisis de facturación con SQL (BigQuery) sobre 20M–25M de envíos mensuales, liberando capacidad para Operaciones y Finanzas.';p.innerHTML=es()?p.dataset.es:p.dataset.en}
+  }
+  function experience(){
+    $$('.experienceDetails .timelineItem').forEach(item=>{
+      const role=item.querySelector('.role')?.textContent||''; const key=Object.keys(content).find(k=>role.includes(k)); const ul=item.querySelector('.expBullets'); if(!key||!ul)return;
+      const rows=content[key]; ul.innerHTML=''; rows.forEach(([en,esText])=>{const li=document.createElement('li');li.dataset.en=en;li.dataset.es=esText;li.innerHTML=es()?esText:en;ul.appendChild(li)});
+    });
+  }
+  function refresh(){packaging();sql();experience()}
+  window.addEventListener('load',()=>setTimeout(refresh,300)); setTimeout(refresh,700);
+  ['currencyFilter','currencyFilter2','experienceView','experienceView2','langEn','langEs'].forEach(id=>$('#'+id)?.addEventListener('change',()=>setTimeout(refresh,180)));
+  $('#langEn')?.addEventListener('click',()=>setTimeout(refresh,180)); $('#langEs')?.addEventListener('click',()=>setTimeout(refresh,180));
+})();
+</script></body></html>
