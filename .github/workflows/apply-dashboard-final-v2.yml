@@ -1,0 +1,229 @@
+name: Apply five final dashboard refinements
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-dashboard-final-v2.yml'
+permissions:
+  contents: write
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply five agreed dashboard changes
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          marker='/* DASHBOARD_FINAL_V2_20260914 */'
+          if marker in s:
+              raise SystemExit('Already applied')
+
+          css=r'''
+          /* DASHBOARD_FINAL_V2_20260914 */
+          .deepDive,.skillsCurated{display:none!important}
+          #skills>.wrap>.skills,#skills>.wrap>.toolkit{display:none!important}
+          .forecastV2{margin-top:24px}
+          .forecastCompare{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;margin-top:18px}
+          .forecastCompare .from,.forecastCompare .to{font:800 27px Manrope}
+          .forecastCompare .from{color:var(--muted)}
+          .forecastCompare .to{color:var(--mint);font-size:34px}
+          .forecastTrack{position:relative;height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:visible}
+          .forecastTrack:before{content:'';position:absolute;left:0;top:0;bottom:0;width:95%;border-radius:999px;background:linear-gradient(90deg,rgba(134,184,255,.75),var(--mint))}
+          .forecastStart{position:absolute;left:70%;top:50%;width:15px;height:15px;border-radius:50%;background:#9aabba;border:3px solid #102033;transform:translate(-50%,-50%);z-index:2}
+          .forecastEnd{position:absolute;left:95%;top:50%;width:18px;height:18px;border-radius:50%;background:var(--mint);border:3px solid #102033;transform:translate(-50%,-50%);z-index:2;box-shadow:0 0 18px rgba(94,230,181,.35)}
+          .forecastDelta{margin-top:13px;color:var(--mint);font-weight:800;font-size:13px}
+          .forecastCaption{margin-top:5px;color:var(--muted);font-size:12px}
+          .experienceSummaryV2 .timelineItem p{max-width:900px}
+          .experienceSummaryV2 .role{margin:3px 0 7px}
+          .skillsV2Grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+          .skillsV2Grid .skill{padding:22px}
+          .skillsV2Grid .skill h4{font-size:18px}
+          .toolkitV2{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
+          .toolkitV2 .tool{padding:22px}
+          .toolkitV2 .tool h4{font-size:18px}
+          .secondaryFilterWrap{padding:0 0 10px}
+          .secondaryFilterBar{margin:0;padding:18px 20px;background:linear-gradient(135deg,rgba(134,184,255,.10),rgba(13,27,42,.78));border:1px solid rgba(134,184,255,.38);border-radius:18px}
+          .secondaryFilterTitle{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:12px}
+          .secondaryFilterTitle h4{font-size:18px}
+          .secondaryFilterTitle p{margin:0;color:var(--muted);font-size:12px}
+          .secondaryFilterBar .dashboardControls{margin:0;padding:0;background:none;border:0}
+          @media(max-width:900px){.skillsV2Grid{grid-template-columns:1fr}.secondaryFilterTitle{align-items:flex-start;flex-direction:column}}
+          '''
+          s=s.replace('</style>',css+'\n</style>',1)
+
+          js=r'''
+          <script>
+          // DASHBOARD_V2_SCRIPT
+          (()=>{
+            const $=q=>document.querySelector(q), $$=q=>[...document.querySelectorAll(q)];
+            const currentLang=()=>document.documentElement.lang==='es'?'es':'en';
+            const currentCompany=()=>($('#experienceView')||{}).value||'all';
+            const currentCurrency=()=>($('#currencyFilter')||{}).value||'usd';
+
+            const summary={
+              en:[
+                ['2023–2026','Mercado Libre','Financial Supervisor | Logistics FP&A Lead','Led logistics FP&A for Middle Mile, Cross-Border Trade and commercial carriers across USD $44.1M in monthly logistics spend and 20M–25M monthly shipments. Improved forecast accuracy from 70% to 95%, delivered recurring transportation savings and led four financial analysts.'],
+                ['2021–2023','Mercado Libre','Senior Financial Analyst | Fulfillment Controller','Owned Fulfillment budgeting, forecasting, P&L, headcount and OPEX planning. Built financial controls with SAP and Google Sheets and led packaging optimization with SQL and Tableau, generating USD $176K–$294K in recurring monthly savings for 12 months.'],
+                ['2019–2021','Fresenius Medical Care North America','Financial Supervisor | Assistant Controller | Cost Accounting & FP&A','Managed manufacturing FP&A, cost accounting, month-end close and full P&L analysis. Reduced the complete monthly close package from 5 days to 2 days and built ROI, NPV and IRR models for strategic investments.'],
+                ['2017–2019','Fresenius Medical Care North America','Senior Financial Analyst | CAPEX & Fixed Assets','Managed approximately USD $100M in annual CAPEX, depreciation planning and fixed-asset controls. Increased CAPEX execution from ~50% to ~90% and automated reporting with SAP and Advanced Excel.']
+              ],
+              es:[
+                ['2023–2026','Mercado Libre','Financial Supervisor | Logistics FP&A Lead','Lideré FP&A de logística para Middle Mile, Cross-Border Trade y transportistas comerciales sobre MXN $750M de gasto logístico mensual y 20M–25M de envíos mensuales. Mejoré la precisión del forecast de 70% a 95%, generé ahorros recurrentes de transporte y lideré cuatro analistas financieros.'],
+                ['2021–2023','Mercado Libre','Senior Financial Analyst | Fulfillment Controller','Gestioné presupuesto, forecast, P&L, headcount y OPEX de Fulfillment. Construí controles financieros con SAP y Google Sheets y lideré optimización de empaque con SQL y Tableau, generando MXN $3M–$5M de ahorro mensual recurrente durante 12 meses.'],
+                ['2019–2021','Fresenius Medical Care North America','Financial Supervisor | Assistant Controller | Cost Accounting & FP&A','Gestioné FP&A de manufactura, contabilidad de costos, cierre mensual y análisis completo de P&L. Reduje el paquete completo de cierre mensual de 5 días a 2 días y desarrollé modelos de ROI, VAN y TIR para inversiones estratégicas.'],
+                ['2017–2019','Fresenius Medical Care North America','Senior Financial Analyst | CAPEX & Fixed Assets','Gestioné aproximadamente MXN $1,700M de CAPEX anual, planeación de depreciación y controles de activos fijos. Incrementé la ejecución de CAPEX de ~50% a ~90% y automaticé reportes con SAP y Excel Avanzado.']
+              ]
+            };
+
+            const skills={
+              all:{
+                en:{'FP&A & Financial Planning':['P&L Management','Budgeting & Forecasting','Variance Analysis','Financial Modeling','Cost Optimization'],'Controllership & Operations Finance':['Cost Accounting','Month-End Close','CAPEX','Internal Controls','Investment Analysis'],'Leadership & Business Partnering':['Finance Business Partnering','Team Leadership','Executive Reporting','Talent Development','Process Improvement']},
+                es:{'FP&A y Planeación Financiera':['Gestión de P&L','Presupuesto y Forecast','Análisis de Variaciones','Modelación Financiera','Optimización de Costos'],'Contraloría y Finanzas Operativas':['Contabilidad de Costos','Cierre Mensual','CAPEX','Controles Internos','Análisis de Inversión'],'Liderazgo y Business Partnering':['Finance Business Partnering','Liderazgo de Equipo','Reporting Ejecutivo','Desarrollo de Talento','Mejora de Procesos']}
+              },
+              meli:{
+                en:{'FP&A & Financial Planning':['P&L Management','Budgeting & Forecasting','Variance Analysis','Headcount Planning','Volume Forecasting','Scenario Analysis','Sensitivity Analysis','Cost Optimization','Cost per Shipment'],'Controllership & Operations Finance':['OPEX Management','Accruals','Billing Reconciliation','Accrual-to-Billing Control','CAPEX','Business Cases','ROI','NPV'],'Leadership & Business Partnering':['Team Leadership','Talent Development','Delegation','Hiring & Onboarding','Finance Business Partnering','Executive Reporting','Financial Reviews','Cross-functional Collaboration']},
+                es:{'FP&A y Planeación Financiera':['Gestión de P&L','Presupuesto y Forecast','Análisis de Variaciones','Planeación de Headcount','Forecast de Volumen','Análisis de Escenarios','Análisis de Sensibilidad','Optimización de Costos','Costo por Envío'],'Contraloría y Finanzas Operativas':['Gestión de OPEX','Accruals','Conciliación de Facturación','Control Accrual-to-Billing','CAPEX','Business Cases','ROI','VAN'],'Liderazgo y Business Partnering':['Liderazgo de Equipo','Desarrollo de Talento','Delegación','Contratación y Onboarding','Finance Business Partnering','Reporting Ejecutivo','Financial Reviews','Colaboración Cross-functional']}
+              },
+              fresenius:{
+                en:{'FP&A & Financial Planning':['P&L Analysis','Budgeting & Forecasting','Variance Analysis','Manufacturing Finance','OPEX Planning','Depreciation Forecasting','Financial Modeling'],'Controllership & Operations Finance':['Month-End Close','Cost Accounting','Standard Costing','BOM','PPV','Material Usage Variance','Inventory Controls','Fixed Assets','Accounts Payable','SOX','Internal Controls','Audit Support'],'Leadership & Business Partnering':['Finance Business Partnering','Engineering Partnership','Quality Partnership','Financial Reporting','Process Improvement','Investment Decision Support']},
+                es:{'FP&A y Planeación Financiera':['Análisis de P&L','Presupuesto y Forecast','Análisis de Variaciones','Finanzas de Manufactura','Planeación de OPEX','Forecast de Depreciación','Modelación Financiera'],'Contraloría y Finanzas Operativas':['Cierre Mensual','Contabilidad de Costos','Costeo Estándar','BOM','PPV','Variación de Uso de Materiales','Controles de Inventario','Activos Fijos','Cuentas por Pagar','SOX','Controles Internos','Soporte de Auditoría'],'Liderazgo y Business Partnering':['Finance Business Partnering','Colaboración con Ingeniería','Colaboración con Calidad','Reporting Financiero','Mejora de Procesos','Soporte a Decisiones de Inversión']}
+              },
+              early:{
+                en:{'Finance Operations':['Billing','Invoice Validation','Reconciliations','Customer Accounts','Business Finance'],'Controls & Audit':['Audit Support','Physical Inventory Counts','Inventory Validation','Audit Documentation','Client Follow-up'],'Business & Ownership':['Operations Management','Customer Service','Entrepreneurship','Problem Solving','Process Discipline']},
+                es:{'Operaciones Financieras':['Facturación','Validación de Facturas','Conciliaciones','Cuentas de Clientes','Finanzas de Negocio'],'Controles y Auditoría':['Soporte de Auditoría','Conteos Físicos','Validación de Inventarios','Documentación de Auditoría','Seguimiento con Clientes'],'Negocio y Emprendimiento':['Gestión Operativa','Servicio al Cliente','Emprendimiento','Resolución de Problemas','Disciplina de Procesos']}
+              }
+            };
+
+            const toolkit={
+              all:['SQL','BigQuery','Advanced Excel','Power BI','Tableau','SAP','Oracle','PeopleSoft','Google Sheets','Anaplan','Salesforce'],
+              meli:['SQL','BigQuery','Tableau','Power BI','SAP','Google Sheets','Advanced Excel'],
+              fresenius:['SAP','Advanced Excel'],
+              early:['PeopleSoft','Mainframe','Oracle','Excel']
+            };
+
+            function renderExperienceSummary(){
+              const box=$('#experienceSummary'); if(!box)return;
+              const l=currentLang();
+              box.classList.add('experienceSummaryV2');
+              box.innerHTML=summary[l].map(r=>`<div class="timelineItem"><div class="year">${r[0]}</div><div><h4>${r[1]}</h4><div class="role">${r[2]}</div><p>${r[3]}</p></div></div>`).join('');
+            }
+
+            function ensureSkillsV2(){
+              const wrap=$('#skills .wrap'); if(!wrap)return;
+              let skillsBox=$('#skillsV2');
+              if(!skillsBox){
+                skillsBox=document.createElement('div'); skillsBox.id='skillsV2'; skillsBox.className='skillsV2Grid';
+                const head=wrap.querySelector('.head'); head.insertAdjacentElement('afterend',skillsBox);
+              }
+              let tkHead=$('#toolkitV2Head');
+              if(!tkHead){
+                tkHead=document.createElement('div'); tkHead.id='toolkitV2Head'; tkHead.className='subhead';
+                tkHead.innerHTML='<div class="eyebrow" data-en="FINANCIAL ANALYTICS TOOLKIT" data-es="HERRAMIENTAS DE ANALÍTICA FINANCIERA">FINANCIAL ANALYTICS TOOLKIT</div><h4 data-en="Tools demonstrated in practice" data-es="Herramientas demostradas en la práctica">Tools demonstrated in practice</h4>';
+                skillsBox.insertAdjacentElement('afterend',tkHead);
+              }
+              let tk=$('#toolkitV2');
+              if(!tk){tk=document.createElement('div'); tk.id='toolkitV2'; tk.className='toolkitV2'; tkHead.insertAdjacentElement('afterend',tk)}
+            }
+
+            function renderSkills(){
+              ensureSkillsV2();
+              const l=currentLang(), c=currentCompany(), key=(c==='meli'||c==='fresenius'||c==='early')?c:'all';
+              const data=skills[key][l];
+              $('#skillsV2').innerHTML=Object.entries(data).map(([title,items])=>`<article class="skill"><h4>${title}</h4><div class="chips">${items.map(x=>`<span>${x}</span>`).join('')}</div></article>`).join('');
+              const tools=toolkit[key];
+              $('#toolkitV2').innerHTML=`<article class="tool"><h4>${l==='es'?'Herramientas utilizadas':'Tools used'}</h4><div class="chips">${tools.map(x=>`<span>${x}</span>`).join('')}</div></article>`;
+              const sh=$('#toolkitV2Head'); if(sh){sh.querySelector('[data-en][data-es]').textContent=sh.querySelector('[data-en][data-es]').dataset[l];sh.querySelector('h4').textContent=sh.querySelector('h4').dataset[l]}
+            }
+
+            function buildSecondFilters(){
+              if($('#secondaryFilters'))return;
+              const exp=$('#experience'); if(!exp)return;
+              const wrap=document.createElement('div'); wrap.id='secondaryFilters'; wrap.className='secondaryFilterWrap';
+              wrap.innerHTML=`<div class="wrap"><div class="secondaryFilterBar"><div class="secondaryFilterTitle"><div><div class="eyebrow" data-en="QUICK DASHBOARD FILTERS" data-es="FILTROS RÁPIDOS DEL DASHBOARD">QUICK DASHBOARD FILTERS</div><h4 data-en="Refine the view before Experience" data-es="Ajusta la vista antes de Experiencia">Refine the view before Experience</h4></div><p data-en="Synchronized with the master filters above." data-es="Sincronizados con los filtros maestros de arriba.">Synchronized with the master filters above.</p></div><div class="dashboardControls"><div class="controlGroup companyControl"><label data-en="Company / Experience" data-es="Empresa / Experiencia">Company / Experience</label><select id="experienceView2"><option value="all" data-en="All experience" data-es="Toda la experiencia">All experience</option><option value="meli">Mercado Libre</option><option value="fresenius">Fresenius Medical Care</option><option value="early" data-en="Early Experience" data-es="Experiencia Inicial">Early Experience</option></select></div><div class="controlGroup"><label data-en="Currency" data-es="Moneda">Currency</label><select id="currencyFilter2"><option value="usd">USD</option><option value="mxn">MXN</option></select></div><button class="resetFilters" id="resetFilters2" data-en="↻ Reset" data-es="↻ Restablecer">↻ Reset</button></div></div></div>`;
+              exp.parentNode.insertBefore(wrap,exp);
+              $('#experienceView2').value=currentCompany(); $('#currencyFilter2').value=currentCurrency();
+              $('#experienceView2').addEventListener('change',e=>{company=e.target.value;$('#experienceView').value=e.target.value;applyFilters();});
+              $('#currencyFilter2').addEventListener('change',e=>{$('#currencyFilter').value=e.target.value;setCurrency(e.target.value);});
+              $('#resetFilters2').addEventListener('click',()=>{company='all';$('#experienceView').value='all';$('#experienceView2').value='all';$('#currencyFilter').value='usd';$('#currencyFilter2').value='usd';applyFilters();setCurrency('usd')});
+            }
+
+            function renderForecast(){
+              const canvas=$('#forecast'); if(!canvas)return;
+              const card=canvas.closest('.card'); if(!card||card.querySelector('.forecastV2'))return;
+              const donut=card.querySelector('.donut'); if(donut)donut.style.display='none';
+              const box=document.createElement('div'); box.className='forecastV2';
+              box.innerHTML=`<div class="forecastCompare"><span class="from">70%</span><div class="forecastTrack"><i class="forecastStart"></i><i class="forecastEnd"></i></div><span class="to">95%</span></div><div class="forecastDelta" data-en="+25 p.p. improvement" data-es="+25 p.p. de mejora">+25 p.p. improvement</div><div class="forecastCaption" data-en="Forecast accuracy improvement" data-es="Mejora en precisión del forecast">Forecast accuracy improvement</div>`;
+              card.appendChild(box);
+            }
+
+            const usdTransport=[6.35,6.59,6.18,6.94,6.47,7.12,6.82,7.24,7.00,7.35,6.88,7.18];
+            const mxnTransport=[108,112,105,118,110,121,116,123,119,125,117,122];
+            const usdPackaging=[188,206,194,224,235,218,247,259,241,271,282,265];
+            const mxnPackaging=[3.2,3.5,3.3,3.8,4.0,3.7,4.2,4.4,4.1,4.6,4.8,4.5];
+
+            const baseSetCurrency=setCurrency;
+            setCurrency=function(v){
+              document.querySelectorAll('[data-usd][data-mxn]').forEach(el=>el.textContent=el.dataset[v]);
+              if(v==='usd'){
+                $('#transportStat').textContent='USD $5.9M–$7.4M'; $('#transportRange').textContent='$5.9M–$7.4M';
+                transport.data.datasets=[{label:currentLang()==='es'?'Perfil mensual ilustrativo':'Illustrative monthly profile',data:usdTransport,backgroundColor:'rgba(94,230,181,.55)',borderColor:mint,borderWidth:1,borderRadius:5}];
+                transport.options.plugins.tooltip.callbacks.label=(ctx)=>'USD $'+ctx.raw.toFixed(2)+'M';
+                packaging.data.datasets=[{label:currentLang()==='es'?'Ahorro mensual ilustrativo':'Illustrative monthly savings',data:usdPackaging,borderColor:mint,backgroundColor:'rgba(94,230,181,.10)',pointBackgroundColor:mint,pointRadius:3,pointHoverRadius:5,tension:.35,fill:true}];
+                packaging.options.plugins.tooltip.callbacks.label=(ctx)=>'USD $'+ctx.raw+'K'; $('#packagingStat').textContent='USD $176K–$294K';
+              }else{
+                $('#transportStat').textContent='MXN $100M–$125M'; $('#transportRange').textContent='MXN $100M–$125M';
+                transport.data.datasets=[{label:currentLang()==='es'?'Perfil mensual ilustrativo':'Illustrative monthly profile',data:mxnTransport,backgroundColor:'rgba(94,230,181,.55)',borderColor:mint,borderWidth:1,borderRadius:5}];
+                transport.options.plugins.tooltip.callbacks.label=(ctx)=>'MXN $'+ctx.raw+'M';
+                packaging.data.datasets=[{label:currentLang()==='es'?'Ahorro mensual ilustrativo':'Illustrative monthly savings',data:mxnPackaging,borderColor:mint,backgroundColor:'rgba(94,230,181,.10)',pointBackgroundColor:mint,pointRadius:3,pointHoverRadius:5,tension:.35,fill:true}];
+                packaging.options.plugins.tooltip.callbacks.label=(ctx)=>'MXN $'+ctx.raw.toFixed(1)+'M'; $('#packagingStat').textContent='MXN $3M–$5M';
+              }
+              transport.data.labels=monthLabels[currentLang()]; packaging.data.labels=monthLabels[currentLang()];
+              transport.update(); packaging.update();
+              if($('#currencyFilter2'))$('#currencyFilter2').value=v;
+            };
+
+            const baseApplyFilters=applyFilters;
+            applyFilters=function(){
+              baseApplyFilters();
+              if($('#experienceView2'))$('#experienceView2').value=currentCompany();
+              renderSkills();
+            };
+
+            const baseApplyLanguage=applyLanguage;
+            applyLanguage=function(v){
+              baseApplyLanguage(v);
+              renderExperienceSummary(); renderSkills();
+              if($('#secondaryFilters'))$$('#secondaryFilters [data-en][data-es]').forEach(el=>el.textContent=el.dataset[v]);
+              if($('.forecastDelta')){$('.forecastDelta').textContent=$('.forecastDelta').dataset[v];$('.forecastCaption').textContent=$('.forecastCaption').dataset[v]}
+              setTimeout(()=>setCurrency(currentCurrency()),80);
+            };
+
+            buildSecondFilters(); renderForecast(); renderExperienceSummary(); ensureSkillsV2(); renderSkills();
+            const expHead=$('#experience .head p'); if(expHead){expHead.dataset.en='All shows four recent roles as an executive career summary. Select a company to open the full deep dive.';expHead.dataset.es='Todo muestra los cuatro puestos más recientes como resumen ejecutivo. Selecciona una empresa para abrir el detalle completo.';expHead.textContent=expHead.dataset[currentLang()]}
+            const notes=$$('.card .note');
+            notes.forEach(n=>{if(n.closest('.card')?.querySelector('#transport')){n.dataset.en='Illustrative Jan–Dec monthly profile within the documented recurring range; not historical monthly actuals.';n.dataset.es='Perfil mensual ilustrativo Ene–Dic dentro del rango recurrente documentado; no representa datos históricos mensuales.';n.textContent=n.dataset[currentLang()]};if(n.closest('.card')?.querySelector('#packaging')){n.dataset.en='Illustrative monthly variation within the documented recurring savings range for the 12-month period; not historical monthly actuals.';n.dataset.es='Variación mensual ilustrativa dentro del rango de ahorro recurrente documentado durante 12 meses; no representa datos históricos mensuales.';n.textContent=n.dataset[currentLang()]}});
+            const kpi=$$('.kpi').find(k=>k.querySelector('span')?.dataset.en==='Forecast accuracy'); if(kpi){kpi.querySelector('strong').textContent='70% → 95%';const sm=kpi.querySelector('small');sm.dataset.en='+25 p.p. improvement';sm.dataset.es='+25 p.p. de mejora';sm.textContent=sm.dataset[currentLang()]}
+            const forecastCase=$$('.case').find(c=>c.querySelector('h4')?.dataset.en==='Forecast & Financial Planning'); if(forecastCase){const cm=forecastCase.querySelector('.caseMetric');if(cm)cm.textContent='70% → 95%';const p=forecastCase.querySelector('p');if(p){p.dataset.en='Led budgeting, forecasting, P&L and variance analysis, improving forecast accuracy from 70% to 95% and modeling Peak Season scenarios at +5%, +10%, -5% and -10% versus forecast.';p.dataset.es='Lideré presupuesto, forecast, P&L y análisis de variaciones, mejorando la precisión del forecast de 70% a 95% y modelando escenarios de Peak Season de +5%, +10%, -5% y -10% vs. forecast.';p.textContent=p.dataset[currentLang()]}}
+            $$('.experienceDetails li[data-en]').forEach(li=>{li.dataset.en=li.dataset.en.replace('maintaining 95% forecast accuracy','improving forecast accuracy from 70% to 95%');li.dataset.es=li.dataset.es.replace('manteniendo 95% de precisión del forecast','mejorando la precisión del forecast de 70% a 95%');if(li.textContent.includes('maintaining 95%')||li.textContent.includes('manteniendo 95%'))li.textContent=li.dataset[currentLang()]});
+
+            $('#experienceView').addEventListener('change',()=>setTimeout(()=>{if($('#experienceView2'))$('#experienceView2').value=currentCompany();renderSkills()},60));
+            $('#currencyFilter').addEventListener('change',()=>setTimeout(()=>setCurrency(currentCurrency()),80));
+            $('#resetFilters').addEventListener('click',()=>setTimeout(()=>{company='all';$('#experienceView').value='all';if($('#experienceView2'))$('#experienceView2').value='all';$('#currencyFilter').value='usd';if($('#currencyFilter2'))$('#currencyFilter2').value='usd';applyFilters();setCurrency('usd')},50));
+            $('#langEn').addEventListener('click',()=>setTimeout(()=>applyLanguage('en'),80));
+            $('#langEs').addEventListener('click',()=>setTimeout(()=>applyLanguage('es'),80));
+            setTimeout(()=>setCurrency(currentCurrency()),120);
+          })();
+          </script>
+          '''
+          s=s.replace('</body>',js+'\n</body>',1)
+          p.write_text(s)
+          PY
+      - name: Commit dashboard changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Implement five agreed dashboard refinements"
+          git push
