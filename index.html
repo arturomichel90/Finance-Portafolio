@@ -556,7 +556,18 @@ document.getElementById('experienceView').addEventListener('change',e=>{company=
   function setText(el,en,es){if(!el)return;el.dataset.en=en;el.dataset.es=es;el.textContent=isES()?es:en}
   function setValue(el,usd,mxn){if(!el)return;el.dataset.usd=usd;el.dataset.mxn=mxn;el.textContent=currency()==='mxn'?mxn:usd}
 
+  function renderPackagingDrivers(){
+    const card=$('#packaging')?.closest('.card'); if(!card)return;
+    setText(card.querySelector('.stat small'),'monthly recurring range','rango mensual recurrente');
+    const drivers=card.querySelectorAll('.driver');
+    setText(drivers[0]?.querySelector('span'),'Recurring period','Periodo recurrente'); setText(drivers[0]?.querySelector('strong'),'12 months','12 meses');
+    setText(drivers[1]?.querySelector('span'),'Monthly savings','Ahorro mensual'); setValue(drivers[1]?.querySelector('strong'),'USD $176K–$294K','MXN $3M–$5M');
+    setText(drivers[2]?.querySelector('span'),'Annualized savings','Ahorro anualizado'); setValue(drivers[2]?.querySelector('strong'),'USD $2.1M–$3.5M','MXN $36M–$60M');
+    setText(card.querySelector('p.note'),'Illustrative monthly variation within the documented recurring range; values rise and fall and are not cumulative historical actuals.','Variación mensual ilustrativa dentro del rango recurrente documentado; los valores suben y bajan y no son datos históricos acumulativos.');
+  }
+
   function renderPackaging(){
+    renderPackagingDrivers();
     const el=$('#packaging'); if(!el||typeof Chart==='undefined')return;
     const mxn=[3.2,4.7,3.4,4.9,3.6,4.5,3.1,4.8,3.7,4.6,3.3,4.4];
     const usd=[188,276,200,288,212,265,182,282,218,271,194,259];
