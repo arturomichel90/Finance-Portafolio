@@ -557,22 +557,17 @@ document.getElementById('experienceView').addEventListener('change',e=>{company=
 
   function renderPackaging(){
     const el=$('#packaging'); if(!el||typeof Chart==='undefined')return;
-    const chart=Chart.getChart(el); if(!chart)return;
     const mxn=[3.2,4.7,3.4,4.9,3.6,4.5,3.1,4.8,3.7,4.6,3.3,4.4];
     const usd=[188,276,200,288,212,265,182,282,218,271,194,259];
     const values=currency()==='mxn'?mxn:usd;
     const months=isES()?['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    chart.config.type='line'; chart.data.labels=months;
-    chart.data.datasets=[{
+    const previous=Chart.getChart(el); if(previous)previous.destroy();
+    window.approvedPackagingChart=new Chart(el,{type:'line',data:{labels:months,datasets:[{
       label:isES()?'Ahorro mensual recurrente':'Recurring monthly savings',data:values,
       borderColor:'#5ee6b5',backgroundColor:'rgba(94,230,181,.08)',borderWidth:3,
       pointBackgroundColor:'#5ee6b5',pointBorderColor:'#07111f',pointBorderWidth:2,
       pointRadius:4,pointHoverRadius:6,tension:.18,fill:false
-    },{label:'',data:values.slice(),hidden:true,borderWidth:0,pointRadius:0}];
-    chart.options.scales={x:{grid:{display:false},ticks:{color:'#9aabba'}},y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#9aabba'}}};
-    chart.options.plugins=chart.options.plugins||{}; chart.options.plugins.legend={labels:{color:'#9aabba',filter:item=>item.datasetIndex===0}};
-    chart.options.plugins.tooltip={callbacks:{label:currency()==='mxn'?(c)=>'MXN $'+Number(c.raw).toFixed(1)+'M':(c)=>'USD $'+c.raw+'K'}};
-    chart.update();
+    }]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#9aabba'}},tooltip:{callbacks:{label:currency()==='mxn'?(c)=>'MXN $'+Number(c.raw).toFixed(1)+'M':(c)=>'USD $'+c.raw+'K'}}},scales:{x:{grid:{display:false},ticks:{color:'#9aabba'}},y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#9aabba'}}}}});
     const card=el.closest('.card'); if(!card)return;
     setText(card.querySelector('.stat small'),'monthly recurring range','rango mensual recurrente');
     const drivers=card.querySelectorAll('.driver');
@@ -681,7 +676,10 @@ document.getElementById('experienceView').addEventListener('change',e=>{company=
     const c=currency(); if($('#currencyFilter2'))$('#currencyFilter2').value=c;
     const company=$('#experienceView')?.value||'all'; if($('#experienceView2'))$('#experienceView2').value=company;
   }
-  function renderAll(){syncSelectors();renderPackaging();renderTransportDrivers();renderSQL();renderExperience()}
+  function renderAll(){
+    syncSelectors();
+    [renderPackaging,renderTransportDrivers,renderSQL,renderExperience].forEach(fn=>{try{fn()}catch(error){console.error('Approved dashboard correction failed:',fn.name,error)}});
+  }
   function selectDefaultCurrency(v){
     const c=v==='es'?'mxn':'usd'; if($('#currencyFilter'))$('#currencyFilter').value=c;if($('#currencyFilter2'))$('#currencyFilter2').value=c;
     if(typeof window.setCurrency==='function')try{window.setCurrency(c)}catch(e){}
