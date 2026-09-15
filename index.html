@@ -336,14 +336,15 @@ document.getElementById('experienceView').addEventListener('change',e=>{company=
   const lang=()=>document.documentElement.lang==='es'?'es':'en';
 
   function packagingBars(){
-    if(typeof packaging==='undefined')return;
-    packaging.config.type='bar';
-    packaging.options.scales={x:{grid:{display:false},ticks:{color:muted}},y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:muted}}};
+    const chart=typeof Chart!=='undefined'?Chart.getChart(document.querySelector('#packaging')):null;
+    if(!chart)return;
+    chart.config.type='bar';
+    chart.options.scales={x:{grid:{display:false},ticks:{color:'#9aabba'}},y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#9aabba'}}};
     const v=($('#currencyFilter')?.value||'usd').toLowerCase();
     const data=v==='mxn'?[3.2,4.6,3.5,4.8,3.9,4.4,3.3,4.7,4.1,3.6,4.9,4.2]:[188,271,206,282,229,259,194,276,241,212,288,247];
-    packaging.data.datasets=[{label:lang()==='es'?'Ahorro mensual recurrente':'Recurring monthly savings',data,backgroundColor:'rgba(94,230,181,.55)',borderColor:mint,borderWidth:1,borderRadius:5}];
-    packaging.options.plugins.tooltip.callbacks.label=v==='mxn'?(ctx)=>'MXN $'+ctx.raw.toFixed(1)+'M':(ctx)=>'USD $'+ctx.raw+'K';
-    packaging.update();
+    chart.data.datasets=[{label:lang()==='es'?'Ahorro mensual recurrente':'Recurring monthly savings',data,backgroundColor:'rgba(94,230,181,.55)',borderColor:'#5ee6b5',borderWidth:1,borderRadius:5}];
+    chart.options.plugins.tooltip.callbacks.label=v==='mxn'?(ctx)=>'MXN $'+ctx.raw.toFixed(1)+'M':(ctx)=>'USD $'+ctx.raw+'K';
+    chart.update();
   }
 
   function automationVisual(){
@@ -406,7 +407,7 @@ document.getElementById('experienceView').addEventListener('change',e=>{company=
 (()=>{
   const $=q=>document.querySelector(q), $$=q=>[...document.querySelectorAll(q)];
   const isES=()=>document.documentElement.lang==='es';
-  function getPackaging(){ try{return typeof packaging!=='undefined'?packaging:null}catch(e){return null} }
+  function getPackaging(){ try{return typeof Chart!=='undefined'?Chart.getChart(document.querySelector('#packaging')):null}catch(e){return null} }
   function fixPackaging(){
     const ch=getPackaging(); if(!ch)return;
     const cur=(($('#currencyFilter')||$('#currencyFilter2'))?.value||'usd').toLowerCase();
@@ -490,7 +491,7 @@ document.getElementById('experienceView').addEventListener('change',e=>{company=
       ['Supported SOX compliance, fixed-asset inventories and audits.','Apoyé cumplimiento SOX, inventarios de activos fijos y auditorías.']]
   };
   function packaging(){
-    let c;try{c=typeof window.packaging!=='undefined'?window.packaging:null}catch(e){}
+    let c;try{c=typeof Chart!=='undefined'?Chart.getChart(document.querySelector('#packaging')):null}catch(e){}
     if(!c)return;
     const cur=(($('#currencyFilter')||$('#currencyFilter2'))?.value||'usd').toLowerCase(); const t=texts[es()?'es':'en'];
     c.config.type='line'; c.data.labels=t.months;
