@@ -63,6 +63,10 @@
 .automationImpact b{display:block;color:var(--text);font-size:12px;margin-bottom:3px}
 @media(max-width:600px){.automationImpact{grid-template-columns:1fr}}
 
+
+/* FOUR_FIXES_CORRECTED_20260914 */
+#skills>.wrap>.subhead:not(#toolkitV2Head){display:none!important}
+.automationV4{margin-top:18px}.workWeekV4{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:16px 0 12px}.workDayV4{height:38px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.035)}.workDayV4.unlocked{background:linear-gradient(135deg,rgba(94,230,181,.72),rgba(134,184,255,.55));border-color:rgba(94,230,181,.75)}.impactV4{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.impactV4 div{padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.025);font-size:11px;color:var(--muted)}.impactV4 b{display:block;color:var(--text);font-size:12px;margin-bottom:3px}@media(max-width:600px){.impactV4{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -392,4 +396,52 @@ document.getElementById('experienceView').addEventListener('change',e=>{company=
 })();
 </script>
 
+<script>
+// FOUR_FIXES_CORRECTED_SCRIPT
+(()=>{
+  const $=q=>document.querySelector(q), $$=q=>[...document.querySelectorAll(q)];
+  const isES=()=>document.documentElement.lang==='es';
+  function getPackaging(){ try{return typeof packaging!=='undefined'?packaging:null}catch(e){return null} }
+  function fixPackaging(){
+    const ch=getPackaging(); if(!ch)return;
+    const cur=(($('#currencyFilter')||$('#currencyFilter2'))?.value||'usd').toLowerCase();
+    ch.config.type='line';
+    ch.data.labels=isES()?['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const data=cur==='mxn'?[3.2,4.6,3.5,4.8,3.9,4.4,3.3,4.7,4.1,3.6,4.9,4.2]:[188,271,206,282,229,259,194,276,241,212,288,247];
+    ch.data.datasets=[{label:isES()?'Ahorro mensual recurrente':'Recurring monthly savings',data,borderColor:'#5ee6b5',backgroundColor:'rgba(94,230,181,.10)',borderWidth:3,pointRadius:4,pointHoverRadius:6,tension:.3,fill:false}];
+    ch.options.scales={x:{grid:{display:false},ticks:{color:'#9aabba'}},y:{beginAtZero:false,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'#9aabba'}}};
+    ch.options.plugins=ch.options.plugins||{}; ch.options.plugins.tooltip=ch.options.plugins.tooltip||{};
+    ch.options.plugins.tooltip.callbacks={label:cur==='mxn'?(c)=>'MXN $'+Number(c.raw).toFixed(1)+'M':(c)=>'USD $'+c.raw+'K'};
+    ch.update();
+  }
+  function fixAutomation(){
+    const card=$$('.case').find(c=>/SQL Logistics Cost Automation/i.test(c.querySelector('h4')?.dataset.en||c.querySelector('h4')?.textContent||'')); if(!card)return;
+    card.querySelectorAll('.metric,.automationV3').forEach(x=>x.style.display='none');
+    let v=card.querySelector('.automationV4'); if(!v){v=document.createElement('div');v.className='automationV4';card.appendChild(v)}
+    v.innerHTML=`<div class="caseMetric">${isES()?'1 día/semana liberado':'1 day/week unlocked'}</div><div class="workWeekV4"><span class="workDayV4 unlocked"></span><span class="workDayV4"></span><span class="workDayV4"></span><span class="workDayV4"></span><span class="workDayV4"></span></div><div class="impactV4"><div><b>${isES()?'Operaciones':'Operations'}</b>${isES()?'Más tiempo para actividades operativas de mayor valor.':'More time for higher-value operational activities.'}</div><div><b>${isES()?'Finanzas':'Finance'}</b>${isES()?'Más tiempo para análisis y soporte a decisiones.':'More time for analysis and decision support.'}</div></div>`;
+    const p=card.querySelector('p'); if(p){p.dataset.en='Automated logistics costing and billing workflows with SQL (BigQuery) across 20M–25M monthly shipments, freeing Operations for higher-value operational activities and Finance for deeper analysis and decision support.';p.dataset.es='Automaticé procesos de costeo y facturación logística con SQL (BigQuery) sobre 20M–25M de envíos mensuales, liberando tiempo de Operaciones para actividades operativas de mayor valor y de Finanzas para análisis y soporte a decisiones.';p.textContent=isES()?p.dataset.es:p.dataset.en}
+  }
+  const extras={
+    'Logistics FP&A Lead':[
+      ['Built Peak Season scenarios at +5%, +10%, -5% and -10% vs. forecast, assessing cost, capacity and resource requirements.','Construí escenarios de Peak Season de +5%, +10%, -5% y -10% vs. forecast, evaluando costo, capacidad y requerimientos de recursos.'],
+      ['Identified carrier billing discrepancies and supported recovery of credits against subsequent monthly costs; reduced accrual-to-billing variance to <1%.','Identifiqué discrepancias de facturación de transportistas y apoyé la recuperación de créditos contra costos mensuales posteriores; reduje la variación accrual-to-billing a <1%.'],
+      ['Evaluated route and carrier scenarios using total spend and cost per shipment, supporting implemented route changes.','Evalué escenarios de rutas y transportistas usando gasto total y costo por envío, apoyando cambios de ruta implementados.'],
+      ['Led 4 direct-report analysts; 2 advanced to new roles and the remaining team became autonomous. Interviewed 3 candidates and supported selection, onboarding and training of 2 hires.','Lideré 4 analistas directos; 2 avanzaron a nuevos roles y el resto del equipo se volvió autónomo. Entrevisté a 3 candidatos y apoyé la selección, onboarding y capacitación de 2 contrataciones.'],
+      ['Built ROI, NPV and CAPEX business cases and contributed to senior-leadership Financial Reviews.','Construí business cases de ROI, VAN y CAPEX y contribuí a Financial Reviews con liderazgo senior.']],
+    'Fulfillment Controller':[
+      ['Planned headcount and labor costs based on volume and operational requirements.','Planeé headcount y costos laborales con base en volumen y requerimientos operativos.'],['Served as Finance Business Partner for Operations, Engineering, Quality, Maintenance and HR.','Actué como Finance Business Partner para Operaciones, Ingeniería, Calidad, Mantenimiento y Recursos Humanos.'],['Standardized OPEX, budget and forecast controls across Mexico Fulfillment Centers.','Estandaricé controles de OPEX, presupuesto y forecast en los Fulfillment Centers de México.'],['Scaled packaging analytics to Mexico, Brazil and Argentina and supported CAPEX, business cases, warehouse investments and productivity.','Escalé la analítica de empaque a México, Brasil y Argentina y apoyé CAPEX, business cases, inversiones de almacén y productividad.'],['Led weekly financial reviews with Directors.','Lideré revisiones financieras semanales con Directores.']],
+    'Assistant Controller':[
+      ['Managed product costing and BOMs, standard costs, production volumes, materials and inventory; analyzed PPV, material usage, FX and manufacturing variances.','Gestioné costeo de producto y BOMs, costos estándar, volúmenes de producción, materiales e inventario; analicé PPV, uso de materiales, FX y variaciones de manufactura.'],['Managed close activities across production orders, allocations, inventory, utilities and manufacturing expenses.','Gestioné actividades de cierre de órdenes de producción, asignaciones, inventario, servicios y gastos de manufactura.'],['Managed OPEX, fixed assets, accounts payable and P&L review; supported SOX controls, physical inventories and internal/external audits.','Gestioné OPEX, activos fijos, cuentas por pagar y revisión de P&L; apoyé controles SOX, inventarios físicos y auditorías internas/externas.']],
+    'CAPEX & Fixed Assets':[
+      ['Owned CAPEX and depreciation budgeting, forecasting and variance analysis plus capitalization, transfers, disposals and fixed-asset controls.','Gestioné presupuesto, forecast y análisis de variaciones de CAPEX y depreciación, además de capitalizaciones, transferencias, bajas y controles de activos fijos.'],['Automated CAPEX reporting with SAP and Advanced Excel and partnered with Engineering and Quality.','Automaticé reportes de CAPEX con SAP y Excel Avanzado y colaboré con Ingeniería y Calidad.'],['Supported SOX compliance, fixed-asset inventories and internal/external audits.','Apoyé cumplimiento SOX, inventarios de activos fijos y auditorías internas/externas.']]};
+  function fixExperience(){
+    $$('.experienceDetails .timelineItem').forEach(item=>{const role=item.querySelector('.role')?.textContent||'';const ul=item.querySelector('.expBullets');if(!ul)return;const key=Object.keys(extras).find(k=>role.includes(k));if(!key)return;extras[key].forEach(([en,es])=>{if(![...ul.children].some(li=>li.dataset.fix4===en)){const li=document.createElement('li');li.dataset.fix4=en;li.dataset.en=en;li.dataset.es=es;li.textContent=isES()?es:en;ul.appendChild(li)}})});
+  }
+  function refresh(){fixPackaging();fixAutomation();fixExperience()}
+  window.addEventListener('load',()=>setTimeout(refresh,350));
+  ['currencyFilter','currencyFilter2','experienceView','experienceView2','langEn','langEs'].forEach(id=>$('#'+id)?.addEventListener('change',()=>setTimeout(refresh,180)));
+  $('#langEn')?.addEventListener('click',()=>setTimeout(refresh,180)); $('#langEs')?.addEventListener('click',()=>setTimeout(refresh,180));
+  setTimeout(refresh,500);
+})();
+</script>
 </body></html>
