@@ -28,21 +28,21 @@
 /* Hero-side portfolio filters: one canonical layout, no inherited navbar overrides */
 header.top>nav.wrap{height:52px;min-height:52px}
 .hero{position:relative}
-.hero>.topFilters{position:absolute;top:25px;left:24px;z-index:2;width:700px;max-width:calc(100% - 48px);margin:0;padding:0;pointer-events:auto}
+.hero>.topFilters{position:fixed;top:64px;left:20px;z-index:90;width:520px;max-width:calc(100% - 48px);margin:0;padding:0;pointer-events:auto}
 .hero>.topFilters>.wrap{width:100%;max-width:none;margin:0;padding:0}
 .hero .unifiedFilters{display:flex;align-items:flex-end;gap:12px;flex-wrap:nowrap;width:max-content;max-width:100%}
 .hero .topFilterGroup{display:flex;flex-direction:column;gap:2px;min-width:0}
 .hero .topFilterGroup label{color:var(--blue);font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;line-height:1.2}
 .hero .topFilterGroup select{height:46px;min-height:46px;background:#102b49;color:#fff;border:1px solid rgba(134,184,255,.65);border-radius:8px;padding:8px 12px;font:700 15px Inter,sans-serif;cursor:pointer}
-.hero .topCompany{flex:0 0 310px;width:310px}
+.hero .topCompany{flex:0 0 245px;width:245px}
 .hero .topCompany select{width:100%;min-width:0;text-overflow:clip}
 .hero .topFilterToggle{display:flex;gap:2px;align-items:center;height:46px;background:#102b49;border:1px solid rgba(134,184,255,.65);border-radius:8px;padding:2px}
 .hero .topFilterToggle button{border:0;border-radius:6px;background:transparent;color:var(--blue);padding:9px 13px;font:800 15px Inter,sans-serif;cursor:pointer}
 .hero .topFilterToggle button.active{background:var(--blue);color:#07111f}
 .hero .filterResetRow{display:flex;justify-content:flex-start;margin-top:3px}
 .hero .filterResetRow .resetFilters{height:34px;min-height:34px;padding:5px 12px;border:1px solid rgba(134,184,255,.55);border-radius:8px;background:rgba(134,184,255,.06);color:var(--blue);font:700 13px Inter,sans-serif;cursor:pointer}
-@media(max-width:1450px){.hero>.topFilters{position:relative;top:auto;left:auto;margin:0 0 18px 20px}.hero{padding-top:35px}}
-@media(max-width:600px){.hero .unifiedFilters{flex-wrap:wrap}.hero>.topFilters{width:auto;max-width:calc(100% - 40px)}.hero .topCompany{flex:0 0 310px;width:310px}}
+@media(max-width:1450px){.hero{padding-top:35px}}
+@media(max-width:600px){.hero .unifiedFilters{flex-wrap:wrap}.hero>.topFilters{width:auto;max-width:calc(100% - 40px)}.hero .topCompany{flex:0 0 245px;width:245px}}
 </style>
 </head>
 <body>
